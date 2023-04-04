@@ -1,0 +1,59 @@
+service: aws-node-http-api-project
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
+  region: ap-southeast-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+      - dynamodb:PutItem
+      - dynamodb:Scan
+      - dynamodb:GetItem
+      - dynamodb:UpdateItem
+      Resource:
+      - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/AuctionsTable'
+
+resources:
+  Resources:
+    AuctionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: AuctionsTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+
+functions:
+  createAuction:
+    handler: createAuction.handler
+    events:
+      - httpApi:
+          path: /auction
+          method: post
+  getAuctions:
+    handler: getAuctions.handler
+    events:
+      - httpApi:
+          path: /auctions
+          method: get
+  getAuction:
+    handler: getAuction.handler
+    events:
+      - httpApi:
+          path: /auction/{id}
+          method: get
+  placeBid:
+    handler: placeBid.handler
+    events:
+      - httpApi:
+          path: /auction/{id}/bid
+          method: patch
