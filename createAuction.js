@@ -4,11 +4,14 @@ const dynamodb=new AWS.DynamoDB.DocumentClient();
 module.exports.handler = async (event,context) => {
   
   const now=new Date();
+  const endDate=new Date(now);
+  // endDate.setHours(endDate.getHours+1);
   const auction={
     id:uuidv4(),
     title:event.body,
     status:'OPEN',
     createdAt:now.toISOString(),
+    endingAt:endDate.toISOString(),
     highestBid:{
       amount:0
     }
